@@ -1,0 +1,73 @@
+package ex11;
+import java.sql.*;
+import java.util.*;
+
+public class FacilDAO {
+	Connection con=Database.connect();
+	//캠핑장에 시설물삭제
+	public void delete(String cno, int fno) {
+		try {
+			String sql="delete from camp_facil where cno=? and fno=?";
+			// 캠핑장별 시설물 삭제
+			PreparedStatement ps=con.prepareStatement(sql);
+			ps.setString(1, cno);
+			ps.setInt(2, fno);
+			ps.execute();
+		}catch(Exception e) {
+			System.out.println("캠핑장에 시설물삭제:" + e.toString());
+		}
+	}
+	
+	//캠핑장에 시설물등록
+	public void insert(String cno, int fno) {
+		try {
+			String sql="insert into camp_facil(cno, fno) values(?,?)";
+			PreparedStatement ps=con.prepareStatement(sql);
+			ps.setString(1, cno);
+			ps.setInt(2, fno);
+			ps.execute();
+		}catch(Exception e) {
+			System.out.println("캠핑장에 시설물등록 오류:" + e.toString());
+		}
+	}
+	//캠핑장별 시설물목록
+	public List<CampFacilVO> list(String cno){ 
+		 // 캠핑장번호 매개변수 받고 캠핑장별 시설물 리스트(캠핑장 번호, 시설물번호)보냄
+		List<CampFacilVO> array=new ArrayList<>(); // 캠핑장별 시설물 리스트 선언
+		try {
+			String sql="SELECT * FROM VIEW_FACIL WHERE CNO=?"; 
+			  //뷰(시설물번호가 같은 캠핑장번호, 시설물 이름) 에서 추출
+			PreparedStatement ps=con.prepareStatement(sql);
+			ps.setString(1, cno);//캠핑장 번호를 ?에 대입
+			ResultSet rs=ps.executeQuery();
+			while(rs.next()) {
+				CampFacilVO vo=new CampFacilVO(); 
+				vo.setFno(rs.getInt("fno")); //시설물 번호 
+				vo.setFname(rs.getString("fname")); //시설물명
+				array.add(vo); // 추가
+			}
+		}catch(Exception e) {
+			System.out.println("캠핑장별 시설물목록 오류:" + e.toString());
+		}
+		return array;
+	}
+	
+	//시설물전체목록
+	public List<FacilVO> list(){ // 목록이므로 arraylist
+		List<FacilVO> array=new ArrayList<>(); //arraylist 선언
+		try {
+			String sql="select * from facil order by fno"; 
+			PreparedStatement ps=con.prepareStatement(sql);
+			ResultSet rs=ps.executeQuery();
+			while(rs.next()) {
+				FacilVO vo=new FacilVO(); //객체 선언
+				vo.setFno(rs.getInt("fno"));  // rs의 결과를 VO에 대입
+				vo.setFname(rs.getString("fname"));
+				array.add(vo); // list 목록에 추가
+			}
+		}catch(Exception e) {
+			System.out.println("시설물전체목록 오류:" + e.toString());
+		}
+		return array;
+	}
+}
